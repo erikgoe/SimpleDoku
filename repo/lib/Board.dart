@@ -1,20 +1,20 @@
-import 'dart:math';
-
 import 'package:SimpleDoku/PredefinedBoards.dart';
 
 class Board {
   static final int boardBase = 9;
-  static final int boardBasePart = 3;
+  static final int boardBaseBlock = 3;
   List<List<Field>> fields;
 
   Board.modify(int number, int seed) {
     clear();
     var toCopy = PredefinedBoards.boards[number].fields;
-    for (int y = 0; y < Board.boardBase; y++) {
-      for (int x = 0; x < Board.boardBase; x++) {
+    for (int y = 0; y < boardBase; y++) {
+      for (int x = 0; x < boardBase; x++) {
         fields[y][x] = Field.of(toCopy[y][x]);
       }
     }
+
+    shuffle(seed);
   }
 
   Board.of(List<Field> fields) {
@@ -38,8 +38,8 @@ class Board {
   }
 
   bool hasEmpty() {
-    for (int y = 0; y < Board.boardBase; y++)
-      for (int x = 0; x < Board.boardBase; x++)
+    for (int y = 0; y < boardBase; y++)
+      for (int x = 0; x < boardBase; x++)
         if (fields[y][x].number == null) return true;
     return false;
   }
@@ -47,8 +47,8 @@ class Board {
   // returns true when the board has be solved
   bool checkBoard() {
     bool ret = true;
-    for (int y = 0; y < Board.boardBase; y++) {
-      for (int x = 0; x < Board.boardBase; x++) {
+    for (int y = 0; y < boardBase; y++) {
+      for (int x = 0; x < boardBase; x++) {
         int number = fields[y][x].number;
         if (number == null) {
           fields[y][x].valid = true;
@@ -64,12 +64,12 @@ class Board {
           if (fields[i][x].number == number) countColumn++;
         }
 
-        int blockOffsetX = x ~/ boardBasePart,
-            blockOffsetY = y ~/ boardBasePart;
-        for (int y2 = 0; y2 < boardBasePart; y2++) {
-          for (int x2 = 0; x2 < boardBasePart; x2++) {
-            if (fields[blockOffsetY * boardBasePart + y2]
-                        [blockOffsetX * boardBasePart + x2]
+        int blockOffsetX = x ~/ boardBaseBlock,
+            blockOffsetY = y ~/ boardBaseBlock;
+        for (int y2 = 0; y2 < boardBaseBlock; y2++) {
+          for (int x2 = 0; x2 < boardBaseBlock; x2++) {
+            if (fields[blockOffsetY * boardBaseBlock + y2]
+                        [blockOffsetX * boardBaseBlock + x2]
                     .number ==
                 number) countBlock++;
           }
@@ -81,6 +81,63 @@ class Board {
       }
     }
     return ret;
+  }
+
+  void shuffle(int seed) {
+    swapColumnBlock(0, 1);
+
+    updateIndices();
+  }
+
+  void swapRowBlock(int first, int second) {
+    var swapList = List<Field>();
+
+    // store first & overwrite
+    for (int y = 0; y < boardBaseBlock; y++) {
+      for (int x = 0; x < boardBase; x++) {
+        swapList.add(fields[y + first * boardBaseBlock][x]);
+        fields[y + first * boardBaseBlock][x] =
+            fields[y + second * boardBaseBlock][x];
+      }
+    }
+
+    // store second
+    for (int y = 0; y < boardBaseBlock; y++) {
+      for (int x = 0; x < boardBase; x++) {
+        fields[y + second * boardBaseBlock][x] =
+            swapList[y * boardBase + x];
+      }
+    }
+  }
+
+  void swapColumnBlock(int first, int second) {
+    var swapList = List<Field>();
+
+    // store first & overwrite
+    for (int y = 0; y < boardBase; y++) {
+      for (int x = 0; x < boardBaseBlock; x++) {
+        swapList.add(fields[y][x + first * boardBaseBlock]);
+        fields[y][x + first * boardBaseBlock] =
+            fields[y][x + second * boardBaseBlock];
+      }
+    }
+
+    // store second
+    for (int y = 0; y < boardBase; y++) {
+      for (int x = 0; x < boardBaseBlock; x++) {
+        fields[y][x + second * boardBaseBlock] =
+            swapList[y * boardBaseBlock + x];
+      }
+    }
+  }
+
+  void updateIndices() {
+    for (int y = 0; y < boardBase; y++) {
+      for (int x = 0; x < boardBase; x++) {
+        fields[y][x].x = x;
+        fields[y][x].y = y;
+      }
+    }
   }
 }
 

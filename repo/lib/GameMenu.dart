@@ -14,7 +14,7 @@ class GameMenu extends StatefulWidget {
 class _GameMenuState extends State<GameMenu> {
   var board = Board.modify(0, 0);
   Field focussed;
-  bool win = true;
+  bool win = false;
   bool finished = false;
 
   void checkBoard() {
@@ -32,52 +32,23 @@ class _GameMenuState extends State<GameMenu> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(children: <Widget>[
-        (focussed != null
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0),
-                      child: Wrap(
-                        alignment: WrapAlignment.center,
-                        children: List.generate(
-                            Board.boardBase + 1,
-                            (i) => Padding(
-                                  padding: const EdgeInsets.all(0),
-                                  child: OutlineButton(
-                                    child: (i == Board.boardBase
-                                        ? Icon(Icons.delete)
-                                        : Text((i + 1).toString())),
-                                    onPressed: () {
-                                      setState(() {
-                                        if (i == Board.boardBase)
-                                          focussed.number = null;
-                                        else
-                                          focussed.number = i + 1;
-                                        focussed = null;
-                                        checkBoard();
-                                      });
-                                    },
-                                  ),
-                                )),
-                      ),
-                    ),
-                  )
-                ],
-              )
-            : Container()),
-        (win
-            ? Row(
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            setState(() {
+              focussed = null;
+            });
+          },
+        ),
+            Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                     Padding(
                       padding: const EdgeInsets.all(50.0),
-                      child: Text("Congratulations!",
-                          style: TextStyle(fontSize: 20, color: Colors.green)),
+                      child: Text(!win?"SimpleDoku":"Congratulations!",
+                          style: TextStyle(fontSize: 20, color: win?Colors.green:null)),
                     )
-                  ])
-            : Container()),
+                  ]),
         Center(
             child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -150,6 +121,42 @@ class _GameMenuState extends State<GameMenu> {
                               .toList()),
                     )
                     .toList())),
+
+        (focussed != null
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: Wrap(
+                        alignment: WrapAlignment.center,
+                        children: List.generate(
+                            Board.boardBase + 1,
+                            (i) => Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                  child: OutlineButton(
+                                    child: (i == Board.boardBase
+                                        ? Icon(Icons.delete)
+                                        : Text((i + 1).toString())),
+                                    onPressed: () {
+                                      setState(() {
+                                        if (i == Board.boardBase)
+                                          focussed.number = null;
+                                        else
+                                          focussed.number = i + 1;
+                                        focussed = null;
+                                        checkBoard();
+                                      });
+                                    },
+                                  ),
+                                )),
+                      ),
+                    ),
+                  )
+                ],
+              )
+            : Container()),
       ]),
     );
   }
