@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -12,10 +14,18 @@ class GameMenu extends StatefulWidget {
 }
 
 class _GameMenuState extends State<GameMenu> {
-  var board = Board.modify(0, 0);
+  Board board;
   Field focussed;
   bool win = false;
   bool finished = false;
+
+  _GameMenuState() {
+    createNewBoard();
+  }
+
+  void createNewBoard() {
+    board = Board.modify(Random().nextInt(1 << 32));
+  }
 
   void checkBoard() {
     if (!board.hasEmpty() || finished) {
@@ -40,15 +50,33 @@ class _GameMenuState extends State<GameMenu> {
             });
           },
         ),
-            Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+        // Title
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(50.0),
+            child: Text(!win ? "SimpleDoku" : "Congratulations, you won!",
+                style:
+                    TextStyle(fontSize: 20, color: win ? Colors.green : null)),
+          )
+        ]),
+        // Reload button
+        (!win
+            ? Row(
+              mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(50.0),
-                      child: Text(!win?"SimpleDoku":"Congratulations!",
-                          style: TextStyle(fontSize: 20, color: win?Colors.green:null)),
-                    )
-                  ]),
+                  Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 32, horizontal: 8),
+                      child: IconButton(
+                        icon: Icon(Icons.replay),
+                        onPressed: () => setState(() {
+                              createNewBoard();
+                            }),
+                      ))
+                ],
+              )
+            : Container()),
+        // Game board
         Center(
             child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -121,41 +149,46 @@ class _GameMenuState extends State<GameMenu> {
                               .toList()),
                     )
                     .toList())),
-
+        // Number pad
         (focussed != null
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  Center(
-                    child: Padding(
+                    Center(
+                        child: Padding(
                       padding: const EdgeInsets.only(bottom: 16.0),
-                      child: Wrap(
-                        alignment: WrapAlignment.center,
-                        children: List.generate(
-                            Board.boardBase + 1,
-                            (i) => Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                  child: OutlineButton(
-                                    child: (i == Board.boardBase
-                                        ? Icon(Icons.delete)
-                                        : Text((i + 1).toString())),
-                                    onPressed: () {
-                                      setState(() {
-                                        if (i == Board.boardBase)
-                                          focussed.number = null;
-                                        else
-                                          focussed.number = i + 1;
-                                        focussed = null;
-                                        checkBoard();
-                                      });
-                                    },
-                                  ),
-                                )),
+                      child: GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 5,
+                            childAspectRatio: 1.6,
+                            mainAxisSpacing: 1),
+                        itemCount: Board.boardBase + 1,
+                        scrollDirection: Axis.vertical,
+                        shrinkWrap: true,
+                        itemBuilder: (context, i) {
+                          return Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 2.0),
+                            child: OutlineButton(
+                              child: (i == Board.boardBase
+                                  ? Icon(Icons.delete)
+                                  : Text((i + 1).toString())),
+                              onPressed: () {
+                                setState(() {
+                                  if (i == Board.boardBase)
+                                    focussed.number = null;
+                                  else
+                                    focussed.number = i + 1;
+                                  focussed = null;
+                                  checkBoard();
+                                });
+                              },
+                            ),
+                          );
+                        },
                       ),
-                    ),
-                  )
-                ],
-              )
+                    ))
+                  ])
             : Container()),
       ]),
     );

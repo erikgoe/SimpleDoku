@@ -7,9 +7,12 @@ class Board {
   static final int boardBaseBlock = 3;
   List<List<Field>> fields;
 
-  Board.modify(int number, int seed) {
+  Board.modify(int seed) {
+    var rnd = Random(seed);
+
     clear();
-    var toCopy = PredefinedBoards.boards[number].fields;
+    var toCopy = PredefinedBoards
+        .boards[rnd.nextInt(PredefinedBoards.boards.length)].fields;
     for (int y = 0; y < boardBase; y++) {
       for (int x = 0; x < boardBase; x++) {
         fields[y][x] = Field.of(toCopy[y][x]);
@@ -17,7 +20,6 @@ class Board {
     }
 
     print("shuffle board $seed");
-    var rnd = Random();
     shuffle(rnd);
   }
 
@@ -91,13 +93,13 @@ class Board {
     callWith3Permutation(swapRowBlock, rnd.nextInt(6));
     callWith3Permutation(swapColumnBlock, rnd.nextInt(6));
 
-    callWith3Permutation((f, s)=>swapRows(0, f, s), rnd.nextInt(6));
-    callWith3Permutation((f, s)=>swapRows(1, f, s), rnd.nextInt(6));
-    callWith3Permutation((f, s)=>swapRows(2, f, s), rnd.nextInt(6));
-    callWith3Permutation((f, s)=>swapColumns(0, f, s), rnd.nextInt(6));
-    callWith3Permutation((f, s)=>swapColumns(1, f, s), rnd.nextInt(6));
-    callWith3Permutation((f, s)=>swapColumns(2, f, s), rnd.nextInt(6));
-    
+    callWith3Permutation((f, s) => swapRows(0, f, s), rnd.nextInt(6));
+    callWith3Permutation((f, s) => swapRows(1, f, s), rnd.nextInt(6));
+    callWith3Permutation((f, s) => swapRows(2, f, s), rnd.nextInt(6));
+    callWith3Permutation((f, s) => swapColumns(0, f, s), rnd.nextInt(6));
+    callWith3Permutation((f, s) => swapColumns(1, f, s), rnd.nextInt(6));
+    callWith3Permutation((f, s) => swapColumns(2, f, s), rnd.nextInt(6));
+
     permutateNumbers(rnd.nextInt(362880));
 
     updateIndices();

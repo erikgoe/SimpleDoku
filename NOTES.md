@@ -6,4 +6,4 @@
   * which value
   * on specific field
 * make git repo of repo/ instead of ./
-* 
+* german translation
