@@ -1,11 +1,17 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:SimpleDoku/PredefinedBoards.dart';
+import 'package:path_provider/path_provider.dart';
 
 class Board {
   static final int boardBase = 9;
   static final int boardBaseBlock = 3;
   List<List<Field>> fields;
+
+  Board.empty() {
+    clear();
+  }
 
   Board.modify(int seed) {
     var rnd = Random(seed);
@@ -233,6 +239,70 @@ class Board {
         fields[y][x].y = y;
       }
     }
+  }
+
+  void save() async {
+    var _sourceDir = Directory((await getApplicationDocumentsDirectory()).path);
+    var file = new File('${_sourceDir.path}/last.dat');
+    if (!await file.exists()) await file.create(recursive: true);
+    String str = "";
+
+    String sep = ";";
+
+    str += fields.length.toString() + sep;
+    for (var list in fields) {
+      str += list.length.toString() + sep;
+      for (var f in list) {
+        str += f.initial ? 't' : 'f';
+        str += f.valid ? 't' : 'f';
+        if (f.number != null) str += f.number.toString();
+        str += sep;
+      }
+    }
+
+    file.writeAsString(str);
+  }
+
+  /// Returns true when the board was loaded
+  Future<bool> load() async {
+    clear();
+
+    var _sourceDir = Directory((await getApplicationDocumentsDirectory()).path);
+    var file = new File('${_sourceDir.path}/last.dat');
+    if (await file.exists()) {
+      var newFields = List<List<Field>>();
+      var str = await file.readAsString();
+      var itr = str.split(";").iterator;
+      itr.moveNext();
+
+      int size = int.parse(itr.current);
+      itr.moveNext();
+      for (int y = 0; y < size; y++) {
+        var list = List<Field>();
+        int subSize = int.parse(itr.current);
+        itr.moveNext();
+        for (int x = 0; x < subSize; x++) {
+          var f = new Field(x, y);
+          f.initial = itr.current[0] != 'f';
+          f.valid = itr.current[1] != 'f';
+          if (itr.current.length > 2)
+            f.number = int.parse(itr.current.substring(2));
+          list.add(f);
+          itr.moveNext();
+        }
+        newFields.add(list);
+      }
+
+      fields = newFields;
+      return true;
+    } else
+      return false;
+  }
+
+  void removeFile() async {
+    var _sourceDir = Directory((await getApplicationDocumentsDirectory()).path);
+    var file = new File('${_sourceDir.path}/last.dat');
+    file.delete();
   }
 }
 
