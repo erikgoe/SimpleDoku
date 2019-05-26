@@ -24,16 +24,15 @@ class _GameMenuState extends State<GameMenu> {
       setState(() {
         if (!loaded) createNewBoard();
       });
+      WidgetsBinding.instance.addObserver(LifecycleHandler(
+          suspendingCallBack: () async {
+            if (!win)
+              board.save();
+            else
+              board.removeFile();
+          },
+          resumeCallBack: () {}));
     });
-
-    WidgetsBinding.instance.addObserver(LifecycleHandler(
-        suspendingCallBack: () async {
-          if (!win)
-            board.save();
-          else
-            board.removeFile();
-        },
-        resumeCallBack: () {}));
   }
 
   void createNewBoard() {
