@@ -83,7 +83,7 @@ class _GameMenuState extends State<GameMenu> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 32, horizontal: 8),
                   child: IconButton(
-                    icon: Icon(Icons.replay),
+                    icon: Icon(Icons.autorenew),
                     onPressed: () => setState(() => createNewBoard()),
                   ))
             ],
