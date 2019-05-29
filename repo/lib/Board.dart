@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:SimpleDoku/PredefinedBoards.dart';
 
 class Board {
@@ -14,7 +16,9 @@ class Board {
       }
     }
 
-    shuffle(seed);
+    print("shuffle board $seed");
+    var rnd = Random();
+    shuffle(rnd);
   }
 
   Board.of(List<Field> fields) {
@@ -83,8 +87,18 @@ class Board {
     return ret;
   }
 
-  void shuffle(int seed) {
-    swapColumnBlock(0, 1);
+  void shuffle(Random rnd) {
+    callWith3Permutation(swapRowBlock, rnd.nextInt(6));
+    callWith3Permutation(swapColumnBlock, rnd.nextInt(6));
+
+    callWith3Permutation((f, s)=>swapRows(0, f, s), rnd.nextInt(6));
+    callWith3Permutation((f, s)=>swapRows(1, f, s), rnd.nextInt(6));
+    callWith3Permutation((f, s)=>swapRows(2, f, s), rnd.nextInt(6));
+    callWith3Permutation((f, s)=>swapColumns(0, f, s), rnd.nextInt(6));
+    callWith3Permutation((f, s)=>swapColumns(1, f, s), rnd.nextInt(6));
+    callWith3Permutation((f, s)=>swapColumns(2, f, s), rnd.nextInt(6));
+    
+    permutateNumbers(rnd.nextInt(362880));
 
     updateIndices();
   }
@@ -104,8 +118,7 @@ class Board {
     // store second
     for (int y = 0; y < boardBaseBlock; y++) {
       for (int x = 0; x < boardBase; x++) {
-        fields[y + second * boardBaseBlock][x] =
-            swapList[y * boardBase + x];
+        fields[y + second * boardBaseBlock][x] = swapList[y * boardBase + x];
       }
     }
   }
@@ -128,6 +141,86 @@ class Board {
         fields[y][x + second * boardBaseBlock] =
             swapList[y * boardBaseBlock + x];
       }
+    }
+  }
+
+  void swapRows(int block, int first, int second) {
+    var swapList = List<Field>();
+
+    // store first & overwrite
+    for (int x = 0; x < boardBase; x++) {
+      swapList.add(fields[block * boardBaseBlock + first][x]);
+      fields[block * boardBaseBlock + first][x] =
+          fields[block * boardBaseBlock + second][x];
+    }
+
+    // store second
+    for (int x = 0; x < boardBase; x++) {
+      fields[block * boardBaseBlock + second][x] = swapList[x];
+    }
+  }
+
+  void swapColumns(int block, int first, int second) {
+    var swapList = List<Field>();
+
+    // store first & overwrite
+    for (int y = 0; y < boardBase; y++) {
+      swapList.add(fields[y][block * boardBaseBlock + first]);
+      fields[y][block * boardBaseBlock + first] =
+          fields[y][block * boardBaseBlock + second];
+    }
+
+    // store second
+    for (int y = 0; y < boardBase; y++) {
+      fields[y][block * boardBaseBlock + second] = swapList[y];
+    }
+  }
+
+  /// [permutationNr] should be in 0..362880
+  void permutateNumbers(int permutationNr) {
+    permutationNr %= 362880;
+    var perm = List<int>();
+
+    // Create permutation
+    {
+      var initSet = List.generate(boardBase, (i) => i);
+      int rem = permutationNr;
+      int div = boardBase;
+
+      while (div > 0) {
+        int index = rem % div;
+        rem ~/= div;
+        div--;
+        perm.add(initSet[index]);
+        initSet.removeAt(index);
+      }
+    }
+    print("perm $permutationNr: $perm");
+
+    // apply permutation
+    for (int y = 0; y < boardBase; y++) {
+      for (int x = 0; x < boardBase; x++) {
+        var n = fields[y][x].number;
+        if (n != null) fields[y][x].number = perm[n - 1] + 1;
+      }
+    }
+  }
+
+  /// Call a function with a permutation of 3 integers. [permNr] defines which permutation to choose (0..6)
+  void callWith3Permutation(void Function(int, int) fn, int permNr) {
+    // 0 == identity
+    if (permNr == 1) {
+      fn(1, 2);
+    } else if (permNr == 2) {
+      fn(0, 1);
+    } else if (permNr == 3) {
+      fn(0, 1);
+      fn(1, 2);
+    } else if (permNr == 4) {
+      fn(0, 1);
+      fn(0, 2);
+    } else if (permNr == 5) {
+      fn(0, 2);
     }
   }
 
