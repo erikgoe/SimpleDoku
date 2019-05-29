@@ -76,20 +76,18 @@ class _GameMenuState extends State<GameMenu> {
             )
           ]),
           // Reload button
-          (!win
-              ? Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: <Widget>[
-                    Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 32, horizontal: 8),
-                        child: IconButton(
-                          icon: Icon(Icons.replay),
-                          onPressed: () => setState(() => createNewBoard()),
-                        ))
-                  ],
-                )
-              : Container()),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 32, horizontal: 8),
+                  child: IconButton(
+                    icon: Icon(Icons.replay),
+                    onPressed: () => setState(() => createNewBoard()),
+                  ))
+            ],
+          ),
           // Game board
           Center(
               child: Column(
