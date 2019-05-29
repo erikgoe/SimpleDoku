@@ -64,6 +64,7 @@ class Board {
         int number = fields[y][x].number;
         if (number == null) {
           fields[y][x].valid = true;
+          ret = false; // was not solved
           continue;
         }
 
