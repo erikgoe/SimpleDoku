@@ -115,6 +115,7 @@ class _GameMenuState extends State<GameMenu> {
                                               ? ""
                                               : field.number.toString(),
                                           style: TextStyle(
+                                              fontSize: 30,
                                               color: field.initial
                                                   ? Theme.of(context)
                                                       .primaryColor
@@ -190,7 +191,10 @@ class _GameMenuState extends State<GameMenu> {
                               child: OutlineButton(
                                 child: (i == Board.boardBase
                                     ? Icon(Icons.delete)
-                                    : Text((i + 1).toString())),
+                                    : Text(
+                                        (i + 1).toString(),
+                                        style: TextStyle(fontSize: 30),
+                                      )),
                                 onPressed: () {
                                   setState(() {
                                     if (i == Board.boardBase)
